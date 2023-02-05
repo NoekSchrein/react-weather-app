@@ -3,7 +3,7 @@ import './TodayTab.css';
 import axios from "axios";
 import WeatherDetail from "../../components/weatherDetail/WeatherDetail";
 
-const apiKey = 'a1f3554f0ce912f2a51bc748448c01b8';
+
 
 function TodayTab({coordinates}) {
 	const [todaysWeather, setTodaysWeather] = useState({});
