@@ -9,7 +9,7 @@ import {Route, Routes} from "react-router-dom";
 import TodayTab from "./pages/todayTab/TodayTab";
 import kelvinToCelcius from './helpers/kelvinToCelcius';
 
-const apiKey = 'a1f3554f0ce912f2a51bc748448c01b8';
+
 
 function App() {
     const [weatherData, setWeatherData] = useState({});
