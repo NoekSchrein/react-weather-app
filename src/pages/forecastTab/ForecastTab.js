@@ -4,7 +4,6 @@ import './ForecastTab.css';
 import kelvinToCelcius from "../../helpers/kelvinToCelcius";
 import createDateString from "../../helpers/createDateString";
 
-const apiKey = 'a1f3554f0ce912f2a51bc748448c01b8';
 
 function ForecastTab({coordinates}) {
     const [forecasts, setForecasts] = useState([]);
