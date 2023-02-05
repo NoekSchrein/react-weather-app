@@ -1,42 +1,80 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import axios from "axios";
 import './App.css';
 import SearchBar from './components/searchBar/SearchBar';
 import TabBarMenu from './components/tabBarMenu/TabBarMenu';
 import MetricSlider from './components/metricSlider/MetricSlider';
+import ForecastTab from './pages/forecastTab/ForecastTab';
+import {Route, Routes} from "react-router-dom";
+import TodayTab from "./pages/todayTab/TodayTab";
+import kelvinToCelcius from './helpers/kelvinToCelcius';
+
+const apiKey = 'a1f3554f0ce912f2a51bc748448c01b8';
 
 function App() {
-  return (
-    <>
-      <div className="weather-container">
+    const [weatherData, setWeatherData] = useState({});
+    const [location, setLocation] = useState('');
+    const [error, toggleError] = useState(false);
 
-        {/*HEADER -------------------- */}
-        <div className="weather-header">
-          <SearchBar/>
+    useEffect(() => {
+        async function fetchData() {
+            toggleError(false);
+            try {
+                const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${location},nl&appid=${apiKey}&lang=nl`);
+                console.log(response.data);
+                setWeatherData(response.data);
+            } catch (e) {
+                console.error(e);
+                toggleError(true);
+            }
+        }
 
-          <span className="location-details">
-            <h2>Bewolkt</h2>
-            <h3> </h3>
-            <h1>14 &deg;</h1>
+        if (location) {
+            fetchData();
+        }
+    }, [location]);
 
-            <button type="button">
-              Haal data op!
-            </button>
-          </span>
-        </div>
+    return (
+        <>
+            <div className="weather-container">
 
-        {/*CONTENT ------------------ */}
-        <div className="weather-content">
-          <TabBarMenu/>
+                {/*HEADER -------------------- */}
+                <div className="weather-header">
+                    <SearchBar setLocationHandler={setLocation}/>
+                    {error &&
+                    <span className="wrong-location-error">
+                        Oeps! Deze locatie bestaat niet
+                    </span>}
 
-          <div className="tab-wrapper">
-            Alle inhoud van de tabbladen komt hier!
-          </div>
-        </div>
+                    <span className="location-details">
+                        {Object.keys(weatherData).length > 0 &&
+                            <>
+                                <h2>{weatherData.weather[0].description}</h2>
+                                <h3>{weatherData.name}</h3>
+                                <h1>{kelvinToCelcius(weatherData.main.temp)}</h1>
+                            </>
+                        }
+                    </span>
+                </div>
 
-        <MetricSlider/>
-      </div>
-    </>
-  );
+                {/*CONTENT ------------------ */}
+                <div className="weather-content">
+                    <TabBarMenu/>
+
+                    <div className="tab-wrapper">
+                        <Routes>
+                            <Route path="/" element={<TodayTab
+                                coordinates={weatherData.coord}/>}/>
+                            <Route path="/komende-week" element={<ForecastTab
+                                coordinates={weatherData.coord}/>}/>
+                        </Routes>
+                    </div>
+                </div>
+
+                <MetricSlider/>
+            </div>
+        </>
+    );
 }
 
 export default App;

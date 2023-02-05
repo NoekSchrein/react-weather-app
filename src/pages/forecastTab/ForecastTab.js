@@ -1,85 +1,70 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import axios from "axios";
 import './ForecastTab.css';
+import kelvinToCelcius from "../../helpers/kelvinToCelcius";
+import createDateString from "../../helpers/createDateString";
 
-function ForecastTab() {
-  return (
-    <div className="tab-wrapper">
-      <article className="forecast-day">
-        <p className="day-description">
-          Maandag
-        </p>
+const apiKey = 'a1f3554f0ce912f2a51bc748448c01b8';
 
-        <section className="forecast-weather">
-            <span>
-              12&deg; C
-            </span>
-          <span className="weather-description">
-              Licht Bewolkt
-            </span>
-        </section>
-      </article>
+function ForecastTab({coordinates}) {
+    const [forecasts, setForecasts] = useState([]);
+    const [error, toggleError] = useState(false);
+    const [loading, toggleLoading] = useState(false);
 
-      <article className="forecast-day">
-        <p className="day-description">
-          Maandag
-        </p>
+    useEffect(() => {
+        async function fetchForecasts() {
 
-        <section className="forecast-weather">
-            <span>
-              12&deg; C
-            </span>
-          <span className="weather-description">
-              Licht Bewolkt
-            </span>
-        </section>
-      </article>
+            toggleLoading(true);
 
-      <article className="forecast-day">
-        <p className="day-description">
-          Maandag
-        </p>
+            try {
+                toggleError(false);
 
-        <section className="forecast-weather">
-            <span>
-              12&deg; C
-            </span>
-          <span className="weather-description">
-              Licht Bewolkt
-            </span>
-        </section>
-      </article>
+                const result = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${apiKey}&lang=nl`);
+                const fiveDayForecast = result.data.list.filter((singleForecast) => {
+                    return singleForecast.dt_txt.includes("12:00:00");
+                });
+                setForecasts(fiveDayForecast);
+            } catch (e) {
+                console.error(e);
+                toggleError(true);
+            }
+            toggleLoading(false);
+        }
 
-      <article className="forecast-day">
-        <p className="day-description">
-          Maandag
-        </p>
+        if (coordinates) {
+            fetchForecasts();
+        }
 
-        <section className="forecast-weather">
-            <span>
-              12&deg; C
-            </span>
-          <span className="weather-description">
-              Licht Bewolkt
-            </span>
-        </section>
-      </article>
+    }, [coordinates]);
 
-      <article className="forecast-day">
-        <p className="day-description">
-          Maandag
-        </p>
+    return (<div className="tab-wrapper">
+            {loading && <span>
+                Loading...
+            </span>}
+            {error && <span className="tab-wrapper">
+                Er is iets misgegaan met het ophalen van de data
+            </span>}
+            {forecasts.length === 0 && !error && <span className="no-forecast">
+                Zoek eerst een locatie om het weer voor deze week te bekijken
+            </span>}
+            {forecasts.map((oneForecast) => {
+                return (<article className="forecast-day"
+                                 key={oneForecast.dt}>
+                        <p className="day-description">
+                            {createDateString(oneForecast.dt)}
+                        </p>
 
-        <section className="forecast-weather">
-            <span>
-              12&deg; C
-            </span>
-          <span className="weather-description">
-              Licht Bewolkt
-            </span>
-        </section>
-      </article>
-    </div>
-  );
+                        <section className="forecast-weather">
+                            <span>
+                                {kelvinToCelcius(oneForecast.main.temp)}
+                            </span>
+                            <span className="weather-description">
+                                {oneForecast.weather[0].description}
+                            </span>
+                        </section>
+                    </article>)
+            })}
+        </div>);
 }
 
 export default ForecastTab;

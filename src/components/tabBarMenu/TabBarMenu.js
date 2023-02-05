@@ -1,19 +1,20 @@
 import React from 'react';
 import './TabBarMenu.css';
+import {NavLink} from "react-router-dom";
 
 function TabBarMenu() {
   return (
     <nav className="tab-bar">
       <ul>
         <li>
-          <a className="active" href="/">
+          <NavLink to="/" className={({ isActive }) => isActive && 'active'}>
             Vandaag
-          </a>
+          </NavLink>
         </li>
         <li>
-          <a href="/">
+          <NavLink to="/komende-week" className={({ isActive }) => isActive && 'active'}>
             Komende week
-          </a>
+          </NavLink>
         </li>
       </ul>
     </nav>
